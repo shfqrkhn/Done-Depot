@@ -2,6 +2,8 @@
 
 Welcome to **Done Depot**, your go-to application for creating, managing, and organizing all of your checklists. Whether you're planning a trip, managing a project, or tracking your daily habits, Done Depot is here to help you get things done.
 
+[**Live Demo**](https://shfqrkhn.github.io/Done-Depot/)
+
 ## Features
 
 *   **Create Detailed Checklists:** Add tasks with due dates, priority levels, and notes to keep everything organized.
@@ -14,7 +16,7 @@ Welcome to **Done Depot**, your go-to application for creating, managing, and or
 
 ## How to Use
 
-1.  **Open the App:** Simply open the `index.html` file in your web browser.
+1.  **Open the App:** Click [here](https://shfqrkhn.github.io/Done-Depot/) to open the app in your web browser.
 2.  **Create a New Checklist:** Give your checklist a name and start adding items.
 3.  **Add Tasks:** Click the "+ Add Item" button to add a new task. You can then set a priority, due date, and add notes.
 4.  **Add Sub-Tasks:** Click the "+" button on any task to add a sub-task.
@@ -25,13 +27,13 @@ Welcome to **Done Depot**, your go-to application for creating, managing, and or
 For a more app-like experience, you can install Done Depot on your desktop or mobile device.
 
 *   **On Desktop (Chrome/Edge):**
-	1.  Open Done Depot in your browser.
-	2.  Click the "Install" icon in the address bar (it looks like a computer with a down arrow).
-	3.  Follow the on-screen instructions to install the app.
+    1.  Open Done Depot in your browser.
+    2.  Click the "Install" icon in the address bar (it looks like a computer with a down arrow).
+    3.  Follow the on-screen instructions to install the app.
 
 *   **On Mobile (Android/iOS):**
-	1.  Open Done Depot in your mobile browser.
-	2.  Tap the "Share" button.
-	3.  Select "Add to Home Screen."
+    1.  Open Done Depot in your mobile browser.
+    2.  Tap the "Share" button.
+    3.  Select "Add to Home Screen."
 
 Now you can launch Done Depot directly from your home screen, just like any other app!
