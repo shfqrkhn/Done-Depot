@@ -1,0 +1,2331 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Done Depot</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#343a40">
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f8f9fa;
+        padding-bottom: 5rem;
+      }
+
+      .navbar {
+        margin-bottom: 1rem;
+        border-radius: 0.375rem;
+      }
+
+      /* Custom Navbar Button Styling for uniformity and touch targets */
+      .navbar .navbar-nav .nav-item .btn.btn-sm {
+        padding: 0.4rem 0.75rem;
+        /* Adjusted padding for better touch targets */
+        margin-left: 0.125rem;
+        /* Reduced margin for compactness */
+        margin-right: 0.125rem;
+        display: inline-flex;
+        /* Helps align icon and text */
+        align-items: center;
+        /* Vertically align icon and text */
+      }
+
+      .navbar .navbar-nav .nav-item .btn.btn-sm .bi {
+        margin-right: 0.35rem;
+        /* Space between icon and text */
+      }
+
+      /* Ensure dropdown toggle also has good padding and alignment */
+      .navbar .navbar-nav .nav-item .dropdown-toggle.nav-link {
+        padding-top: 0.4rem;
+        padding-bottom: 0.4rem;
+        padding-left: 0.75rem;
+        /* Match button horizontal padding */
+        padding-right: 0.75rem;
+        /* Match button horizontal padding */
+        margin-left: 0.125rem;
+        margin-right: 0.125rem;
+        display: inline-flex;
+        align-items: center;
+      }
+
+      .navbar .navbar-nav .nav-item .dropdown-toggle.nav-link .bi {
+        margin-right: 0.35rem;
+        /* Space between icon and text */
+      }
+
+      .checklist-header-container {
+        display: flex;
+        align-items: flex-end;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+      }
+
+      #checklistNameInput {
+        font-size: 1.5rem;
+        font-weight: 500;
+        border: 1px solid transparent;
+        box-shadow: none !important;
+        padding-left: 0;
+        transition: border-color 0.15s ease-in-out;
+        flex-grow: 1;
+      }
+
+      #checklistNameInput:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, .25) !important;
+      }
+
+      #checklistNameInput.is-valid {
+        border-color: #198754 !important;
+      }
+
+      #lastSavedTimestamp {
+        font-size: 0.8rem;
+        color: #6c757d;
+        white-space: nowrap;
+        padding-bottom: 0.275rem;
+      }
+
+      .search-input-group {
+        position: relative;
+      }
+
+      #searchInput.filter-active {
+        background-color: #e9ecef;
+      }
+
+      #clearSearchBtn {
+        position: absolute;
+        right: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #6c757d;
+        display: none;
+        padding: 0.25rem 0.5rem;
+        line-height: 1;
+        background: none;
+        border: none;
+      }
+
+      #searchInput.filter-active+#clearSearchBtn {
+        display: inline-block;
+      }
+
+      #checklist .list-group-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding-left: 1.25rem;
+        border-radius: 0.375rem;
+        margin-bottom: 0.5rem;
+        border: 1px solid #dee2e6;
+        transition: opacity 0.3s ease-out, background-color 0.5s ease-out;
+      }
+
+      #checklist .list-group-item:focus-visible:not(:has(:focus-visible)) {
+        outline: 2px solid #0d6efd;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+      }
+
+      #checklist .list-group-item.item-added-flash {
+        background-color: #d1e7dd;
+      }
+
+      #checklist .list-group-item.item-fading-out {
+        opacity: 0;
+      }
+
+      .search-highlight {
+        background-color: yellow;
+        font-weight: bold;
+      }
+
+      #checklist .list-group-item .item-content {
+        flex-grow: 1;
+        overflow: hidden;
+      }
+
+      #checklist .list-group-item .item-actions {
+        display: flex;
+        gap: 0.25rem;
+        align-items: center;
+      }
+
+      .completed .item-text {
+        text-decoration: line-through;
+        color: #6c757d;
+      }
+
+      .priority-high {
+        border-left: 5px solid #dc3545 !important;
+      }
+
+      .priority-medium {
+        border-left: 5px solid #ffc107 !important;
+      }
+
+      .priority-low {
+        border-left: 5px solid #0dcaf0 !important;
+      }
+
+      .item-overdue {
+        border-left-width: 5px;
+        border-left-color: #842029 !important;
+        background-color: #f8d7da;
+      }
+
+      .item-overdue .item-text,
+      .item-overdue .small {
+        color: #58151c;
+      }
+
+      .critical-icon {
+        color: #dc3545;
+      }
+
+      .pause-point-icon {
+        color: #fd7e14;
+      }
+
+      .notes-indicator-filled {
+        color: #0d6efd;
+      }
+
+      .notes-indicator-empty {
+        color: #6c757d;
+      }
+
+      .expand-icon {
+        cursor: pointer;
+        font-size: 1.2rem;
+        width: 24px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+
+      .item-checkbox {
+        margin-right: 0.5rem;
+        flex-shrink: 0;
+      }
+
+      .badge {
+        font-size: 0.75em;
+        border-radius: 0.25rem;
+      }
+
+      .section-header {
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        padding-left: 0.5rem;
+        border-bottom: 1px solid #dee2e6;
+        border-radius: 0.25rem;
+      }
+
+      .section-item-count {
+        font-size: 0.85em;
+        font-weight: normal;
+        color: #6c757d;
+        margin-left: 0.5em;
+      }
+
+      .empty-section-message {
+        font-style: italic;
+        color: #6c757d;
+        padding-left: 0.75rem;
+        font-size: 0.9em;
+      }
+
+      #globalAlerts {
+        position: fixed;
+        top: 70px;
+        right: 20px;
+        z-index: 1056;
+        min-width: 300px;
+      }
+
+      .form-label {
+        font-weight: 500;
+      }
+
+      .modal-content,
+      .form-control:not(#checklistNameInput),
+      .form-select,
+      .btn,
+      .alert,
+      .input-group-text {
+        border-radius: 0.375rem !important;
+      }
+
+      .input-group .form-control {
+        border-top-left-radius: 0.375rem !important;
+        border-bottom-left-radius: 0.375rem !important;
+      }
+
+      .input-group .input-group-text {
+        border-top-right-radius: 0.375rem !important;
+        border-bottom-right-radius: 0.375rem !important;
+      }
+
+      .progress-container {
+        min-height: 2.25rem;
+        display: flex;
+        align-items: center;
+      }
+
+      .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      #scrollToTopBtn {
+        display: none;
+        position: fixed;
+        bottom: 20px;
+        right: 30px;
+        z-index: 99;
+        border: none;
+        outline: none;
+        background-color: #0d6efd;
+        color: white;
+        cursor: pointer;
+        padding: 10px 15px;
+        border-radius: 50%;
+        font-size: 1.5rem;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+      }
+
+      #scrollToTopBtn:hover {
+        background-color: #0b5ed7;
+      }
+
+      @media (max-width: 575.98px) {
+        #checklist .list-group-item .item-actions {
+          gap: 0.1rem;
+        }
+
+        #checklist .list-group-item .item-actions .btn {
+          padding-left: 0.35rem;
+          padding-right: 0.35rem;
+        }
+
+        .add-subtask-btn .button-text {
+          display: none;
+        }
+
+        #checklistNameInput {
+          font-size: 1.25rem;
+        }
+
+        .progress-container {
+          justify-content: flex-start;
+          margin-top: 0.5rem;
+        }
+
+        #scrollToTopBtn {
+          bottom: 15px;
+          right: 15px;
+          padding: 8px 12px;
+          font-size: 1.25rem;
+        }
+
+        .navbar-nav .dropdown-menu {
+          position: absolute;
+        }
+
+        .navbar .navbar-nav .nav-item .btn.btn-sm .button-text-nav,
+        .navbar .navbar-nav .nav-item .dropdown-toggle.nav-link .button-text-nav {
+          display: none;
+        }
+
+        .navbar .navbar-nav .nav-item .btn.btn-sm .bi,
+        .navbar .navbar-nav .nav-item .dropdown-toggle.nav-link .bi {
+          margin-right: 0;
+        }
+      }
+
+      @media (min-width: 768px) {
+
+        .navbar .navbar-nav .nav-item .btn.btn-sm .button-text-nav,
+        .navbar .navbar-nav .nav-item .dropdown-toggle.nav-link .button-text-nav {
+          display: inline;
+        }
+
+        .navbar .navbar-nav .nav-item .btn.btn-sm .bi,
+        .navbar .navbar-nav .nav-item .dropdown-toggle.nav-link .bi {
+          margin-right: 0.35rem;
+        }
+      }
+
+      @media print {
+        body {
+          font-family: 'Times New Roman', Times, serif;
+          background-color: #fff !important;
+          color: #000;
+          font-size: 10pt;
+          margin: 0.5in;
+        }
+
+        .navbar,
+        #importBtnTrigger,
+        #exportBtn,
+        .input-group,
+        #globalAlerts,
+        .item-actions,
+        .modal,
+        .btn-close,
+        #clearSearchBtn,
+        #scrollToTopBtn,
+        #srAnnouncer,
+        #sortOptionsDropdown,
+        #loadFromGithubBtn {
+          display: none !important;
+        }
+
+        .checklist-header-container {
+          flex-direction: column;
+          align-items: center !important;
+          margin-bottom: 0.25in !important;
+        }
+
+        #checklistNameInput {
+          display: block !important;
+          font-size: 14pt !important;
+          font-weight: bold !important;
+          text-align: center;
+          border: none !important;
+          border-bottom: 1px solid #000 !important;
+          padding-bottom: 0.1in !important;
+          color: #000 !important;
+          background-color: #fff !important;
+          box-shadow: none !important;
+        }
+
+        #lastSavedTimestamp {
+          display: block !important;
+          text-align: center;
+          font-size: 8pt !important;
+          padding-bottom: 0 !important;
+          margin-top: 0.05in;
+        }
+
+        .progress-container .progress {
+          display: none !important;
+        }
+
+        .progress-container #progressText {
+          display: inline !important;
+          font-size: 10pt !important;
+          font-weight: bold !important;
+          color: #000 !important;
+        }
+
+        .container {
+          max-width: 100% !important;
+          width: 100% !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+
+        .row.mb-3 {
+          display: block !important;
+          margin-bottom: 0.5rem !important;
+        }
+
+        .row.mb-3>.col-md-4 {
+          width: 100% !important;
+          max-width: 100% !important;
+          flex: 0 0 100% !important;
+          text-align: left !important;
+          padding: 0 !important;
+        }
+
+        #checklist .list-group-item {
+          border: 1px solid #999 !important;
+          page-break-inside: avoid !important;
+          padding: 0.15in 0.2in !important;
+          gap: 0.3rem !important;
+          margin-bottom: 0.1in !important;
+          border-left-width: 3px !important;
+        }
+
+        .item-overdue {
+          background-color: #e0e0e0 !important;
+          border-left-color: #58151c !important;
+        }
+
+        #checklist .list-group-item .item-checkbox {
+          appearance: none;
+          width: 0.8em;
+          height: 0.8em;
+          border: 1px solid #000 !important;
+          margin-right: 0.4em;
+          vertical-align: middle;
+          display: inline-block;
+          position: relative;
+          top: -1px;
+        }
+
+        #checklist .list-group-item .item-checkbox:checked::before {
+          content: "\2713";
+          position: absolute;
+          left: 50%;
+          top: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 0.8em;
+          font-weight: bold;
+          color: #000 !important;
+        }
+
+        .item-content .item-text {
+          font-size: 10pt !important;
+          color: #000 !important;
+          text-decoration: none !important;
+        }
+
+        .completed .item-text {
+          color: #555 !important;
+          text-decoration: line-through !important;
+        }
+
+        .search-highlight {
+          background-color: transparent !important;
+          font-weight: normal !important;
+        }
+
+        .priority-high {
+          border-left-color: #666 !important;
+        }
+
+        .priority-medium {
+          border-left-color: #999 !important;
+        }
+
+        .priority-low {
+          border-left-color: #ccc !important;
+        }
+
+        .section-header {
+          font-size: 11pt !important;
+          font-weight: bold;
+          color: #000 !important;
+          border-bottom: 1px solid #000 !important;
+          margin-top: 0.2in !important;
+          margin-bottom: 0.1in !important;
+          padding-left: 0 !important;
+        }
+
+        .section-item-count {
+          display: none !important;
+        }
+
+        .empty-section-message {
+          display: none !important;
+        }
+
+        .badge {
+          border: 1px solid #333 !important;
+          color: #000 !important;
+          background-color: #fff !important;
+          font-size: 8pt !important;
+          padding: 0.1em 0.3em !important;
+          margin-right: 0.25em !important;
+        }
+
+        .expand-icon {
+          display: none !important;
+        }
+
+        .sub-item-container {
+          margin-left: 0.25in !important;
+          padding-left: 0 !important;
+          border-left: none !important;
+        }
+
+        .sub-item-container .list-group-item {
+          margin-left: 0 !important;
+        }
+
+        #emptyChecklistMessage {
+          border: 1px dashed #999 !important;
+          color: #333 !important;
+          padding: 0.2in !important;
+          font-size: 10pt !important;
+        }
+
+        .text-muted.small,
+        .item-meta {
+          font-size: 8pt !important;
+          color: #333 !important;
+        }
+
+        .item-icons i {
+          color: #000 !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <i class="bi bi-check2-square"></i> Done Depot </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ms-auto">
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle text-light" href="#" id="loadFromGithubBtn" role="button" data-bs-toggle="dropdown" aria-expanded="false" title="Load a checklist template">
+                <i class="bi bi-github"></i>
+                <span class="button-text-nav"> Templates</span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="loadFromGithubBtn" id="githubChecklistDropdown">
+                <li>
+                  <hr class="dropdown-divider">
+                </li>
+                <li>
+                  <span class="dropdown-item-text text-muted small">Select a checklist to load</span>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle text-light" href="#" id="sortOptionsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Sort checklist items by" aria-live="polite">
+                <i class="bi bi-sort-down"></i>
+                <span class="button-text-nav"> Sort By</span>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sortOptionsDropdown">
+                <li>
+                  <a class="dropdown-item" href="#" data-sort="default">Default</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#" data-sort="priority">Priority</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#" data-sort="dueDateAsc">Due Date (Earliest)</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#" data-sort="dueDateDesc">Due Date (Latest)</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#" data-sort="alphabeticalAsc">Alphabetical (A-Z)</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#" data-sort="alphabeticalDesc">Alphabetical (Z-A)</a>
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#" data-sort="status">Status</a>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <button id="addItemBtn" class="btn btn-sm btn-outline-light mx-1 p-2" type="button" title="Add New Item">
+                <i class="bi bi-plus-circle-fill"></i>
+                <span class="button-text-nav"> Add Item</span>
+              </button>
+            </li>
+            <li class="nav-item">
+              <input type="file" id="importFile" class="d-none" accept=".json">
+              <button id="importBtnTrigger" class="btn btn-sm btn-outline-light mx-1 p-2" type="button" title="Import Checklist">
+                <i class="bi bi-upload"></i>
+                <span class="button-text-nav"> Import</span>
+              </button>
+            </li>
+            <li class="nav-item">
+              <button id="exportBtn" class="btn btn-sm btn-outline-light mx-1 p-2" type="button" title="Export Checklist">
+                <i class="bi bi-download"></i>
+                <span class="button-text-nav"> Export</span>
+              </button>
+            </li>
+            <li class="nav-item">
+              <button id="clearChecklistBtn" class="btn btn-sm btn-outline-danger mx-1 p-2" type="button" title="Clear Entire Checklist">
+                <i class="bi bi-trash3-fill"></i>
+                <span class="button-text-nav"> Clear All</span>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div class="container">
+      <div id="globalAlerts"></div>
+      <div id="srAnnouncer" class="visually-hidden" aria-live="polite" aria-atomic="true"></div>
+      <div class="checklist-header-container">
+        <input type="text" id="checklistNameInput" class="form-control form-control-lg" placeholder="Checklist Name" aria-label="Checklist Name">
+        <span id="lastSavedTimestamp"></span>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-8">
+          <div class="input-group search-input-group">
+            <span class="input-group-text">
+              <i class="bi bi-search"></i>
+            </span>
+            <input type="text" id="searchInput" class="form-control" placeholder="Search tasks by text, notes, or tags...">
+            <button id="clearSearchBtn" type="button" aria-label="Clear search filter">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-md-4 d-flex align-items-center justify-content-end progress-container">
+          <div class="progress w-100" role="progressbar" aria-label="Checklist completion progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="height: 1.75rem;">
+            <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-success" style="width: 0%">
+              <span id="progressText" class="fw-bold">0 / 0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="checklist" class="list-group mb-3" role="tree"></div>
+      <div id="emptyChecklistMessage" class="alert alert-info text-center" style="display: none;"> Your checklist is empty. Click "+Item" to get started! </div>
+    </div>
+    <button id="scrollToTopBtn" title="Go to top">
+      <i class="bi bi-arrow-up-circle-fill"></i>
+    </button>
+    <template id="checklistItemTemplate">
+      <div class="list-group-item" role="treeitem" aria-level="1" tabindex="-1">
+        <span class="expand-icon" role="button" tabindex="0" aria-expanded="true">
+          <i class="bi bi-chevron-down"></i>
+        </span>
+        <input class="form-check-input item-checkbox" type="checkbox" value="">
+        <div class="item-content">
+          <span class="item-text" id="item-text-{{id}}"></span>
+          <span class="item-icons"></span>
+          <span class="item-status-badge"></span>
+          <div class="text-muted small item-meta"></div>
+          <div class="item-tags"></div>
+        </div>
+        <div class="item-actions">
+          <button class="btn btn-sm btn-outline-primary notes-btn" title="View/Edit Notes">
+            <i class="bi bi-journal-text"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-secondary add-subtask-btn">
+            <i class="bi bi-plus-lg"></i>
+            <span class="button-text d-none d-sm-inline">Add Sub-task</span>
+          </button>
+          <button class="btn btn-sm btn-outline-warning edit-btn" title="Edit Item">
+            <i class="bi bi-pencil-fill"></i>
+          </button>
+          <button class="btn btn-sm btn-outline-danger delete-btn" title="Delete Item">
+            <i class="bi bi-trash-fill"></i>
+          </button>
+        </div>
+      </div>
+    </template>
+    <div class="modal fade" id="itemModal" tabindex="-1" aria-labelledby="itemModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <form id="itemForm">
+            <div class="modal-header">
+              <h5 class="modal-title" id="itemModalLabel">Add/Edit Item</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" id="itemId">
+              <input type="hidden" id="parentId">
+              <div class="mb-3">
+                <label for="itemText" class="form-label">Task Text <span class="text-danger">*</span>
+                </label>
+                <input type="text" class="form-control" id="itemText" required>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="itemPriority" class="form-label">Priority</label>
+                  <select id="itemPriority" class="form-select">
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="low">Low</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="itemStatus" class="form-label">Status</label>
+                  <select id="itemStatus" class="form-select">
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                    <option value="not_applicable">Not Applicable</option>
+                    <option value="failed">Failed</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3" id="itemSectionContainer">
+                  <label for="itemSection" class="form-label">Section (for top-level items)</label>
+                  <input type="text" class="form-control" id="itemSection" placeholder="e.g., Work, Personal">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="itemPurpose" class="form-label">Purpose</label>
+                  <select id="itemPurpose" class="form-select">
+                    <option value="standard">Standard</option>
+                    <option value="pause_point">Pause Point</option>
+                    <option value="verification_step">Verification Step</option>
+                    <option value="information_only">Information Only</option>
+                  </select>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="itemDueDate" class="form-label">Due Date</label>
+                  <input type="date" class="form-control" id="itemDueDate">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="itemAssignee" class="form-label">Assignee</label>
+                  <input type="text" class="form-control" id="itemAssignee" placeholder="e.g., John Doe">
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="itemTags" class="form-label">Tags (comma-separated)</label>
+                <input type="text" class="form-control" id="itemTags" placeholder="e.g., urgent, project-x">
+              </div>
+              <div class="mb-3">
+                <label for="itemReferences" class="form-label">References (comma-separated URLs/IDs)</label>
+                <input type="text" class="form-control" id="itemReferences" placeholder="e.g., http://link.com, DOC-123">
+              </div>
+              <div class="mb-3">
+                <label for="itemNotes" class="form-label">Notes</label>
+                <textarea id="itemNotes" class="form-control" rows="3"></textarea>
+              </div>
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="itemIsCritical">
+                <label class="form-check-label" for="itemIsCritical"> Is Critical? </label>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-primary">Save Item</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="notesModalLabel">Notes for <span id="notesItemText"></span>
+            </h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="notesItemId">
+            <textarea id="notesTextarea" class="form-control" rows="5"></textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" id="saveNotesBtn" class="btn btn-primary">Save Notes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="deleteItemModal" tabindex="-1" aria-labelledby="deleteItemModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteItemModalLabel">Confirm Deletion</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body"> Are you sure you want to delete this item: " <strong id="deleteItemName"></strong>"? This action cannot be undone. If it has sub-tasks, they will also be deleted. <input type="hidden" id="deleteItemId">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" id="confirmDeleteBtn" class="btn btn-danger">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="clearChecklistModal" tabindex="-1" aria-labelledby="clearChecklistModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="clearChecklistModalLabel">Confirm Clear Checklist</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body"> Are you sure you want to clear the entire checklist? All items will be permanently removed. This action cannot be undone. </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" id="confirmClearBtn" class="btn btn-danger">Clear All</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="clearCompletedModal" tabindex="-1" aria-labelledby="clearCompletedModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="clearCompletedModalLabel">Confirm Clear Completed Tasks</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body"> Are you sure you want to remove all completed top-level tasks and their sub-tasks? This action cannot be undone. </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" id="confirmClearCompletedBtn" class="btn btn-warning">Clear Completed</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="modal fade" id="pausePointModal" tabindex="-1" aria-labelledby="pausePointModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="pausePointModalLabel">Pause Point Confirmation</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body"> This item is a designated PAUSE POINT: " <strong id="pausePointItemText"></strong>". <p class="mt-2">Notes: <span id="pausePointItemNotes" class="text-muted"></span>
+            </p> Are you sure you want to mark this item as completed? <input type="hidden" id="pausePointItemId">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="button" id="confirmPausePointBtn" class="btn btn-success">Confirm & Complete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+      /**
+       * Done Depot - Main application IIFE
+       */
+      const DoneDepot = (() => {
+        // Configuration object for the application
+        const config = {
+          STORAGE_KEY: 'Done-Depot_v1_base',
+          DEFAULT_CHECKLIST_NAME: "Untitled Checklist",
+          UNCATEGORIZED_SECTION_NAME: "Uncategorized",
+          DEBOUNCE_DELAY: 300,
+          SAVE_FEEDBACK_DURATION: 1500,
+          ADD_ITEM_FLASH_DURATION: 1000,
+          DELETE_ITEM_FADE_DURATION: 300,
+          LAST_SAVED_UPDATE_INTERVAL: 60000,
+          SORT_STORAGE_KEY: 'Done-Depot_sortOrder_v1',
+          LAST_SAVED_TS_KEY_SUFFIX: '_timestamp',
+          CSS_CLASSES: {
+            COMPLETED: 'completed',
+            PRIORITY_HIGH: 'priority-high',
+            PRIORITY_MEDIUM: 'priority-medium',
+            PRIORITY_LOW: 'priority-low',
+            OVERDUE: 'item-overdue',
+            NOTES_FILLED: 'bi-journal-richtext notes-indicator-filled',
+            NOTES_EMPTY: 'bi-journal-text notes-indicator-empty',
+            EXPAND_DOWN: 'bi-chevron-down',
+            EXPAND_RIGHT: 'bi-chevron-right',
+            INPUT_VALID: 'is-valid',
+            ITEM_ADDED_FLASH: 'item-added-flash',
+            ITEM_FADING_OUT: 'item-fading-out',
+            FILTER_ACTIVE: 'filter-active',
+            DROPDOWN_ITEM_ACTIVE: 'active',
+            SEARCH_HIGHLIGHT: 'search-highlight'
+          },
+          // GitHub Checklist URLs for the "Templates" dropdown - SORTED ALPHABETICALLY
+          GITHUB_CHECKLISTS: [{
+            name: "Apartment & House Hunting",
+            url: "https://raw.githubusercontent.com/shfqrkhn/Done-Depot/main/Checklists/Apartment%20%26%20House%20Hunting%20Checklist.JSON"
+          }, {
+            name: "DJI Mini 3 Pro Flight",
+            url: "https://raw.githubusercontent.com/shfqrkhn/Done-Depot/main/Checklists/DJI%20Mini%203%20Pro%20Flight%20Checklist.JSON"
+          }, {
+            name: "Daily Habit Tracker",
+            url: "https://raw.githubusercontent.com/shfqrkhn/Done-Depot/main/Checklists/Daily%20Habit%20Tracker.JSON"
+          }, {
+            name: "Daily Habits & Workout",
+            url: "https://raw.githubusercontent.com/shfqrkhn/Done-Depot/main/Checklists/Daily%20Habits%20%26%20Workout%20Routine.JSON"
+          }, {
+            name: "Destinations",
+            url: "https://raw.githubusercontent.com/shfqrkhn/Done-Depot/main/Checklists/Destinations.JSON"
+          }, {
+            name: "Moving Checklist",
+            url: "https://raw.githubusercontent.com/shfqrkhn/Done-Depot/main/Checklists/Moving%20Checklist.JSON"
+          }, {
+            name: "One Bag Travel",
+            url: "https://raw.githubusercontent.com/shfqrkhn/Done-Depot/main/Checklists/One%20Bag%20Travel%20Checklist.JSON"
+          }, {
+            name: "Road Trip",
+            url: "https://raw.githubusercontent.com/shfqrkhn/Done-Depot/main/Checklists/Road%20Trip%20Checklist.JSON"
+          }].sort((a, b) => a.name.localeCompare(b.name)) // Sort alphabetically by name
+        };
+        // Manages all data operations (load, save, CRUD, sort, filter)
+        const DataManager = {
+          checklistName: config.DEFAULT_CHECKLIST_NAME,
+          checklistItems: [],
+          _sampleDataLoadedDueToError: false,
+          _oldFormatMigrated: false,
+          currentSortOrder: 'default',
+          sampleData: {
+            checklistName: "Sample Project Checklist",
+            items: [{
+              id: 'sample-1',
+              text: 'Project Alpha Kickoff Meeting',
+              status: 'pending',
+              completedTimestamp: null,
+              priority: 'high',
+              isCritical: true,
+              notes: 'Prepare agenda, invite attendees.',
+              subItems: [{
+                id: 'sample-1-1',
+                text: 'Draft agenda',
+                status: 'pending',
+                completedTimestamp: null,
+                priority: 'high',
+                isCritical: false,
+                notes: '',
+                subItems: [],
+                assignee: 'Alice',
+                dueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                section: '',
+                tags: ['planning'],
+                purpose: 'standard',
+                isPausePoint: false,
+                references: [],
+                isExpanded: true
+              }, {
+                id: 'sample-1-2',
+                text: 'Send invitations',
+                status: 'pending',
+                completedTimestamp: null,
+                priority: 'medium',
+                isCritical: false,
+                notes: '',
+                subItems: [],
+                assignee: 'Alice',
+                dueDate: '',
+                section: '',
+                tags: ['communication'],
+                purpose: 'standard',
+                isPausePoint: false,
+                references: [],
+                isExpanded: true
+              }],
+              assignee: 'Project Lead',
+              dueDate: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+              section: 'Project Alpha',
+              tags: ['meeting', 'planning'],
+              purpose: 'standard',
+              isPausePoint: false,
+              references: [],
+              isExpanded: true
+            }, {
+              id: 'sample-2',
+              text: 'Develop User Authentication Feature',
+              status: 'completed',
+              completedTimestamp: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+              priority: 'high',
+              isCritical: true,
+              notes: 'Includes JWT and OAuth options.',
+              subItems: [],
+              assignee: 'Backend Team',
+              dueDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+              section: 'Development',
+              tags: ['feature', 'auth', 'backend'],
+              purpose: 'standard',
+              isPausePoint: false,
+              references: ['auth_spec_v1.doc'],
+              isExpanded: true
+            }, {
+              id: 'sample-3',
+              text: 'Deploy to Staging',
+              status: 'completed',
+              completedTimestamp: new Date().toISOString(),
+              priority: 'medium',
+              isCritical: false,
+              notes: 'Ensure all tests pass.',
+              subItems: [],
+              assignee: 'DevOps',
+              dueDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+              section: 'Deployment',
+              tags: ['deploy', 'staging'],
+              purpose: 'standard',
+              isPausePoint: false,
+              references: [],
+              isExpanded: true
+            }, ]
+          },
+          init: function() {
+            this.loadData();
+            this.currentSortOrder = localStorage.getItem(config.SORT_STORAGE_KEY) || 'default';
+          },
+          loadData: function() {
+            this._sampleDataLoadedDueToError = false;
+            this._oldFormatMigrated = false;
+            try {
+              const storedData = localStorage.getItem(config.STORAGE_KEY);
+              if (storedData) {
+                const parsedData = JSON.parse(storedData);
+                if (typeof parsedData === 'object' && parsedData !== null && parsedData.hasOwnProperty('items') && parsedData.hasOwnProperty('checklistName')) {
+                  this.checklistItems = parsedData.items || [];
+                  this.checklistName = parsedData.checklistName || config.DEFAULT_CHECKLIST_NAME;
+                } else if (Array.isArray(parsedData)) {
+                  this.checklistItems = parsedData;
+                  this.checklistName = config.DEFAULT_CHECKLIST_NAME;
+                  this._oldFormatMigrated = true;
+                  this.saveData();
+                } else {
+                  throw new Error("Invalid data format in localStorage.");
+                }
+                this._ensureIsExpandedRecursive(this.checklistItems);
+              } else {
+                this.checklistName = this.sampleData.checklistName;
+                this.checklistItems = JSON.parse(JSON.stringify(this.sampleData.items));
+                this.saveData();
+              }
+            } catch (error) {
+              console.error("Error loading data:", error);
+              this.checklistName = this.sampleData.checklistName;
+              this.checklistItems = JSON.parse(JSON.stringify(this.sampleData.items));
+              this._sampleDataLoadedDueToError = true;
+            }
+          },
+          saveData: function() {
+            try {
+              const dataToSave = {
+                checklistName: this.checklistName,
+                items: this.checklistItems
+              };
+              localStorage.setItem(config.STORAGE_KEY, JSON.stringify(dataToSave));
+              localStorage.setItem(config.STORAGE_KEY + config.LAST_SAVED_TS_KEY_SUFFIX, Date.now().toString());
+              UIManager.updateLastSavedTimestamp();
+            } catch (error) {
+              console.error("Error saving data:", error);
+              UIManager.showAlert('Error saving data to local storage. Storage might be full.', 'danger');
+            }
+          },
+          getChecklistName: function() {
+            return this.checklistName;
+          },
+          setChecklistName: function(name) {
+            this.checklistName = name.trim() || config.DEFAULT_CHECKLIST_NAME;
+            this.saveData();
+          },
+          setSortOrder: function(sortOrder) {
+            this.currentSortOrder = sortOrder;
+            localStorage.setItem(config.SORT_STORAGE_KEY, sortOrder);
+          },
+          getSortOrder: function() {
+            return this.currentSortOrder;
+          },
+          _ensureIsExpandedRecursive: function(items) {
+            items.forEach(item => {
+              if (typeof item.isExpanded === 'undefined') item.isExpanded = true;
+              if (item.subItems && item.subItems.length > 0) this._ensureIsExpandedRecursive(item.subItems);
+            });
+          },
+          generateId: function() {
+            return Date.now().toString(36) + Math.random().toString(36).substring(2, 9);
+          },
+          getDefaultItemValues: function(text = '', parentId = null, formValues = {}) {
+            const purpose = formValues.purpose || 'standard';
+            return {
+              id: this.generateId(),
+              text: text,
+              status: formValues.status || 'pending',
+              completedTimestamp: (formValues.status === 'completed') ? new Date().toISOString() : null,
+              priority: formValues.priority || 'medium',
+              isCritical: formValues.isCritical || false,
+              notes: formValues.notes || '',
+              subItems: [],
+              assignee: formValues.assignee || '',
+              dueDate: formValues.dueDate || '',
+              section: parentId ? '' : (formValues.section || ''),
+              tags: formValues.tags || [],
+              purpose: purpose,
+              isPausePoint: purpose === 'pause_point',
+              references: formValues.references || [],
+              isExpanded: true,
+            };
+          },
+          addOrUpdateItem: function(formData, itemIdToUpdate, parentIdForNew) {
+            if (itemIdToUpdate) {
+              const itemPath = this.findItemPathById(itemIdToUpdate);
+              if (itemPath) {
+                const originalItem = itemPath.item;
+                const updatedItemState = {
+                  ...originalItem,
+                  ...formData
+                };
+                if (updatedItemState.status === 'completed') {
+                  updatedItemState.completedTimestamp = originalItem.status !== 'completed' ? new Date().toISOString() : (originalItem.completedTimestamp || new Date().toISOString());
+                } else {
+                  updatedItemState.completedTimestamp = null;
+                }
+                itemPath.item = updatedItemState;
+                this.saveData();
+                return itemPath.item;
+              }
+              return null;
+            } else {
+              const newItem = this.getDefaultItemValues(formData.text, parentIdForNew, formData);
+              if (parentIdForNew) {
+                const parentPath = this.findItemPathById(parentIdForNew);
+                if (parentPath) {
+                  if (!parentPath.item.subItems) parentPath.item.subItems = [];
+                  parentPath.item.subItems.push(newItem);
+                  parentPath.item.isExpanded = true;
+                  this.saveData();
+                  return newItem;
+                }
+                return null;
+              } else {
+                this.checklistItems.push(newItem);
+                this.saveData();
+                return newItem;
+              }
+            }
+          },
+          deleteItem: function(itemId) {
+            const itemPath = this.findItemPathById(itemId);
+            if (itemPath) {
+              const deletedItemText = itemPath.item.text;
+              itemPath.list.splice(itemPath.index, 1);
+              this.saveData();
+              return {
+                text: deletedItemText,
+                originalIndex: itemPath.index,
+                parentList: itemPath.list
+              };
+            }
+            return null;
+          },
+          updateNotes: function(itemId, notes) {
+            const itemPath = this.findItemPathById(itemId);
+            if (itemPath) {
+              itemPath.item.notes = notes;
+              this.saveData();
+              return itemPath.item;
+            }
+            return null;
+          },
+          toggleExpandState: function(itemId) {
+            const itemPath = this.findItemPathById(itemId);
+            if (itemPath && itemPath.item.subItems && itemPath.item.subItems.length > 0) {
+              itemPath.item.isExpanded = !itemPath.item.isExpanded;
+              this.saveData();
+              return itemPath.item.isExpanded;
+            }
+            return null;
+          },
+          updateItemStatus: function(itemId, newStatus) {
+            const itemPath = this.findItemPathById(itemId);
+            if (itemPath) {
+              itemPath.item.status = newStatus;
+              itemPath.item.completedTimestamp = newStatus === 'completed' ? new Date().toISOString() : null;
+              this.saveData();
+              return itemPath.item;
+            }
+            return null;
+          },
+          clearAllItems: function() {
+            this.checklistItems = [];
+            this.checklistName = config.DEFAULT_CHECKLIST_NAME;
+            this.saveData();
+          },
+          clearCompletedItems: function() {
+            this.checklistItems = this.checklistItems.filter(item => item.status !== 'completed');
+            this.saveData();
+            return this.checklistItems.length;
+          },
+          findItemPathById: function(id, items = this.checklistItems, path = []) {
+            for (let i = 0; i < items.length; i++) {
+              const currentItem = items[i];
+              const currentPath = [...path, {
+                item: currentItem,
+                list: items,
+                index: i
+              }];
+              if (currentItem.id === id) return {
+                item: currentItem,
+                list: items,
+                index: i,
+                fullPath: currentPath
+              };
+              if (currentItem.subItems && currentItem.subItems.length > 0) {
+                const foundInSub = this.findItemPathById(id, currentItem.subItems, currentPath);
+                if (foundInSub) return foundInSub;
+              }
+            }
+            return null;
+          },
+          _getPriorityValue: function(priority) {
+            return ({
+              'high': 1,
+              'medium': 2,
+              'low': 3
+            })[priority] || 4;
+          },
+          _getStatusOrderValue: function(status) {
+            return ({
+              'pending': 1,
+              'failed': 2,
+              'not_applicable': 3,
+              'completed': 4
+            })[status] || 5;
+          },
+          _sortSingleLevelOfItems: function(items) {
+            items.sort((a, b) => {
+              const prioComp = this._getPriorityValue(a.priority) - this._getPriorityValue(b.priority);
+              if (prioComp !== 0) return prioComp;
+              return a.text.toLowerCase().localeCompare(b.text.toLowerCase());
+            });
+            items.forEach(item => {
+              if (item.subItems && item.subItems.length > 0) this._sortSingleLevelOfItems(item.subItems);
+            });
+          },
+          getSortedAndFilteredDataForDisplay: function(filterText = '') {
+            let itemsToProcess = JSON.parse(JSON.stringify(this.checklistItems));
+            if (filterText) {
+              const lowerFilterText = filterText.toLowerCase();
+
+              function filterRecursive(itemsArr) {
+                return itemsArr.reduce((acc, item) => {
+                  const selfMatches = item.text.toLowerCase().includes(lowerFilterText) || item.notes.toLowerCase().includes(lowerFilterText) || (item.tags && item.tags.some(tag => tag.toLowerCase().includes(lowerFilterText)));
+                  let filteredSubItems = [];
+                  if (item.subItems && item.subItems.length > 0) {
+                    filteredSubItems = filterRecursive(item.subItems);
+                  }
+                  if (selfMatches || filteredSubItems.length > 0) {
+                    acc.push({
+                      ...item,
+                      subItems: filteredSubItems,
+                      isExpanded: true
+                    });
+                  }
+                  return acc;
+                }, []);
+              }
+              itemsToProcess = filterRecursive(itemsToProcess);
+            }
+            if (this.currentSortOrder !== 'default') {
+              itemsToProcess.sort((a, b) => {
+                switch (this.currentSortOrder) {
+                  case 'priority':
+                    const prioComp = this._getPriorityValue(a.priority) - this._getPriorityValue(b.priority);
+                    return prioComp !== 0 ? prioComp : a.text.toLowerCase().localeCompare(b.text.toLowerCase());
+                  case 'dueDateAsc':
+                    if (!a.dueDate && !b.dueDate) return a.text.toLowerCase().localeCompare(b.text.toLowerCase());
+                    if (!a.dueDate) return 1;
+                    if (!b.dueDate) return -1;
+                    return new Date(a.dueDate) - new Date(b.dueDate) || a.text.toLowerCase().localeCompare(b.text.toLowerCase());
+                  case 'dueDateDesc':
+                    if (!a.dueDate && !b.dueDate) return a.text.toLowerCase().localeCompare(b.text.toLowerCase());
+                    if (!a.dueDate) return 1;
+                    if (!b.dueDate) return -1;
+                    return new Date(b.dueDate) - new Date(a.dueDate) || a.text.toLowerCase().localeCompare(b.text.toLowerCase());
+                  case 'alphabeticalAsc':
+                    return a.text.toLowerCase().localeCompare(b.text.toLowerCase());
+                  case 'alphabeticalDesc':
+                    return b.text.toLowerCase().localeCompare(a.text.toLowerCase());
+                  case 'status':
+                    const statusComp = this._getStatusOrderValue(a.status) - this._getStatusOrderValue(b.status);
+                    return statusComp !== 0 ? statusComp : (this._getPriorityValue(a.priority) - this._getPriorityValue(b.priority) || a.text.toLowerCase().localeCompare(b.text.toLowerCase()));
+                  default:
+                    return 0;
+                }
+              });
+            }
+            itemsToProcess.forEach(item => {
+              if (item.subItems && item.subItems.length > 0) this._sortSingleLevelOfItems(item.subItems);
+            });
+            const sections = {};
+            itemsToProcess.forEach(item => {
+              const effectiveSectionKey = (this.currentSortOrder !== 'default' || !item.section || item.section.trim() === "") ? config.UNCATEGORIZED_SECTION_NAME : item.section.trim();
+              if (!sections[effectiveSectionKey]) sections[effectiveSectionKey] = [];
+              sections[effectiveSectionKey].push(item);
+            });
+            let sortedSectionNames = Object.keys(sections);
+            if (this.currentSortOrder === 'default') {
+              sortedSectionNames = Object.keys(sections).filter(name => name !== config.UNCATEGORIZED_SECTION_NAME);
+              sortedSectionNames.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
+              if (sections[config.UNCATEGORIZED_SECTION_NAME]) {
+                sortedSectionNames.push(config.UNCATEGORIZED_SECTION_NAME);
+              }
+            }
+            const finalSortedData = [];
+            sortedSectionNames.forEach(sectionName => {
+              const itemsInSection = sections[sectionName];
+              if (this.currentSortOrder === 'default') {
+                this._sortSingleLevelOfItems(itemsInSection);
+              }
+              finalSortedData.push({
+                name: sectionName,
+                items: itemsInSection,
+                isSection: true
+              });
+            });
+            return finalSortedData;
+          },
+          importData: function(jsonData) {
+            if (Array.isArray(jsonData)) {
+              this.checklistItems = jsonData;
+              this.checklistName = config.DEFAULT_CHECKLIST_NAME;
+            } else if (typeof jsonData === 'object' && jsonData !== null && jsonData.hasOwnProperty('items')) {
+              this.checklistItems = jsonData.items || [];
+              this.checklistName = jsonData.checklistName || config.DEFAULT_CHECKLIST_NAME;
+            } else {
+              throw new Error("Invalid JSON structure for import.");
+            }
+            this._ensureIsExpandedRecursive(this.checklistItems);
+            this.saveData();
+          },
+          getDataForExport: function() {
+            return {
+              checklistName: this.checklistName,
+              items: this.checklistItems
+            };
+          },
+          getProgress: function() {
+            const topLevelItems = this.checklistItems;
+            const completedTopLevel = topLevelItems.filter(item => item.status === 'completed').length;
+            return {
+              completed: completedTopLevel,
+              total: topLevelItems.length
+            };
+          }
+        };
+        const UIManager = {
+          dom: {},
+          modals: {},
+          itemTemplate: null,
+          lastFocusedElement: null,
+          _lastSavedTimer: null,
+          init: function() {
+            this.cacheDomElements();
+            this.initModals();
+            this.itemTemplate = document.getElementById('checklistItemTemplate');
+            this.updateLastSavedTimestamp();
+            this._startLastSavedUpdater();
+            this.updateSortDropdownButton(DataManager.getSortOrder());
+            this.populateGithubChecklistDropdown();
+          },
+          cacheDomElements: function() {
+            this.dom.addItemBtn = document.getElementById('addItemBtn');
+            this.dom.checklistContainer = document.getElementById('checklist');
+            this.dom.emptyMsg = document.getElementById('emptyChecklistMessage');
+            this.dom.searchInput = document.getElementById('searchInput');
+            this.dom.clearSearchBtn = document.getElementById('clearSearchBtn');
+            this.dom.progressDisplayContainer = document.querySelector('.progress-container');
+            this.dom.progressBar = document.getElementById('progressBar');
+            this.dom.progressText = document.getElementById('progressText');
+            this.dom.checklistNameInput = document.getElementById('checklistNameInput');
+            this.dom.lastSavedTimestamp = document.getElementById('lastSavedTimestamp');
+            this.dom.sortOptionsDropdown = document.getElementById('sortOptionsDropdown');
+            this.dom.sortOptionsLinks = document.querySelectorAll('#sortOptionsDropdown + .dropdown-menu .dropdown-item');
+            this.dom.githubChecklistDropdown = document.getElementById('githubChecklistDropdown');
+            this.dom.loadFromGithubBtn = document.getElementById('loadFromGithubBtn');
+            this.dom.itemModalEl = document.getElementById('itemModal');
+            this.dom.itemForm = document.getElementById('itemForm');
+            this.dom.itemId = document.getElementById('itemId');
+            this.dom.parentId = document.getElementById('parentId');
+            this.dom.itemText = document.getElementById('itemText');
+            this.dom.itemPriority = document.getElementById('itemPriority');
+            this.dom.itemStatus = document.getElementById('itemStatus');
+            this.dom.itemSectionContainer = document.getElementById('itemSectionContainer');
+            this.dom.itemSection = document.getElementById('itemSection');
+            this.dom.itemPurpose = document.getElementById('itemPurpose');
+            this.dom.itemDueDate = document.getElementById('itemDueDate');
+            this.dom.itemAssignee = document.getElementById('itemAssignee');
+            this.dom.itemTags = document.getElementById('itemTags');
+            this.dom.itemReferences = document.getElementById('itemReferences');
+            this.dom.itemNotes = document.getElementById('itemNotes');
+            this.dom.itemIsCritical = document.getElementById('itemIsCritical');
+            this.dom.itemModalLabel = document.getElementById('itemModalLabel');
+            this.dom.notesModalEl = document.getElementById('notesModal');
+            this.dom.notesItemIdEl = document.getElementById('notesItemId');
+            this.dom.notesTextareaEl = document.getElementById('notesTextarea');
+            this.dom.notesItemTextEl = document.getElementById('notesItemText');
+            this.dom.saveNotesBtn = document.getElementById('saveNotesBtn');
+            this.dom.deleteItemModalEl = document.getElementById('deleteItemModal');
+            this.dom.deleteItemIdEl = document.getElementById('deleteItemId');
+            this.dom.deleteItemNameEl = document.getElementById('deleteItemName');
+            this.dom.confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            this.dom.clearChecklistModalEl = document.getElementById('clearChecklistModal');
+            this.dom.confirmClearBtn = document.getElementById('confirmClearBtn');
+            this.dom.clearCompletedModalEl = document.getElementById('clearCompletedModal');
+            this.dom.confirmClearCompletedBtn = document.getElementById('confirmClearCompletedBtn');
+            this.dom.pausePointModalEl = document.getElementById('pausePointModal');
+            this.dom.pausePointItemIdEl = document.getElementById('pausePointItemId');
+            this.dom.pausePointItemTextEl = document.getElementById('pausePointItemText');
+            this.dom.pausePointItemNotesEl = document.getElementById('pausePointItemNotes');
+            this.dom.confirmPausePointBtn = document.getElementById('confirmPausePointBtn');
+            this.dom.importFileEl = document.getElementById('importFile');
+            this.dom.importBtnTrigger = document.getElementById('importBtnTrigger');
+            this.dom.exportBtn = document.getElementById('exportBtn');
+            this.dom.globalAlertsContainer = document.getElementById('globalAlerts');
+            this.dom.srAnnouncer = document.getElementById('srAnnouncer');
+            this.dom.scrollToTopBtn = document.getElementById('scrollToTopBtn');
+            this.dom.clearChecklistBtn = document.getElementById('clearChecklistBtn');
+          },
+          initModals: function() {
+            this.modals.itemModal = new bootstrap.Modal(this.dom.itemModalEl);
+            this.modals.notesModal = new bootstrap.Modal(this.dom.notesModalEl);
+            this.modals.deleteItemModal = new bootstrap.Modal(this.dom.deleteItemModalEl);
+            this.modals.clearChecklistModal = new bootstrap.Modal(this.dom.clearChecklistModalEl);
+            if (this.dom.clearCompletedModalEl) {
+              this.modals.clearCompletedModal = new bootstrap.Modal(this.dom.clearCompletedModalEl);
+            }
+            this.modals.pausePointModal = new bootstrap.Modal(this.dom.pausePointModalEl);
+            ['itemModalEl', 'notesModalEl', 'deleteItemModalEl', 'clearChecklistModalEl', 'clearCompletedModalEl', 'pausePointModalEl'].forEach(modalKey => {
+              const modalElement = this.dom[modalKey];
+              if (modalElement) {
+                modalElement.addEventListener('hidden.bs.modal', () => {
+                  if (this.lastFocusedElement && typeof this.lastFocusedElement.focus === 'function') {
+                    this.lastFocusedElement.focus();
+                  } else {
+                    const focusTarget = this.dom.addItemBtn || this.dom.searchInput;
+                    if (focusTarget) focusTarget.focus();
+                  }
+                  this.lastFocusedElement = null;
+                });
+              }
+            });
+          },
+          populateGithubChecklistDropdown: function() {
+            const dropdownMenu = this.dom.githubChecklistDropdown;
+            if (!dropdownMenu) return;
+            while (dropdownMenu.firstChild && !dropdownMenu.firstChild.classList?.contains('dropdown-divider') && !dropdownMenu.firstChild.classList?.contains('dropdown-item-text')) {
+              dropdownMenu.removeChild(dropdownMenu.firstChild);
+            }
+            config.GITHUB_CHECKLISTS.forEach(checklist => { // Already sorted in config
+              const listItem = document.createElement('li');
+              const link = document.createElement('a');
+              link.className = 'dropdown-item';
+              link.href = '#';
+              link.textContent = checklist.name;
+              link.dataset.url = checklist.url;
+              listItem.appendChild(link);
+              const firstSpecialItem = dropdownMenu.querySelector('.dropdown-divider, .dropdown-item-text');
+              if (firstSpecialItem) {
+                dropdownMenu.insertBefore(listItem, firstSpecialItem);
+              } else {
+                dropdownMenu.appendChild(listItem);
+              }
+            });
+          },
+          renderChecklistName: function(name) {
+            if (this.dom.checklistNameInput.value !== name) {
+              this.dom.checklistNameInput.value = name;
+            }
+          },
+          _startLastSavedUpdater: function() {
+            if (this._lastSavedTimer) clearInterval(this._lastSavedTimer);
+            this._lastSavedTimer = setInterval(() => this.updateLastSavedTimestamp(), config.LAST_SAVED_UPDATE_INTERVAL);
+          },
+          updateLastSavedTimestamp: function() {
+            const lastSaved = localStorage.getItem(config.STORAGE_KEY + config.LAST_SAVED_TS_KEY_SUFFIX);
+            if (lastSaved) {
+              const savedDate = new Date(parseInt(lastSaved));
+              const now = new Date(); // Keep 'now' pristine for each calculation step
+              const diffSeconds = Math.round((new Date() - savedDate) / 1000); // Use fresh 'new Date()' for diff
+              const diffMinutes = Math.round(diffSeconds / 60);
+              const diffHours = Math.round(diffMinutes / 60);
+              let relativeTime;
+              if (diffSeconds < 5) {
+                relativeTime = "Saved just now";
+              } else if (diffMinutes < 1) {
+                relativeTime = `Saved ${diffSeconds} sec ago`;
+              } else if (diffMinutes < 60) {
+                relativeTime = `Saved ${diffMinutes} min${diffMinutes > 1 ? 's' : ''} ago`;
+              } else if (diffHours < 24 && (new Date()).toDateString() === savedDate.toDateString()) {
+                relativeTime = `Saved today at ${savedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+              } else if (diffHours < 48 && (new Date(new Date().setDate(new Date().getDate() - 1))).toDateString() === savedDate.toDateString()) {
+                relativeTime = `Saved yesterday at ${savedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+              } else {
+                relativeTime = `Saved on ${savedDate.toLocaleDateString()} at ${savedDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+              }
+              this.dom.lastSavedTimestamp.textContent = relativeTime;
+            } else {
+              this.dom.lastSavedTimestamp.textContent = "Not saved yet";
+            }
+          },
+          showChecklistNameSavedFeedback: function() {
+            this.dom.checklistNameInput.classList.add(config.CSS_CLASSES.INPUT_VALID);
+            setTimeout(() => {
+              this.dom.checklistNameInput.classList.remove(config.CSS_CLASSES.INPUT_VALID);
+            }, config.SAVE_FEEDBACK_DURATION);
+          },
+          updateSortDropdownButton: function(currentSortType) {
+            this.dom.sortOptionsLinks.forEach(link => {
+              if (link.dataset.sort === currentSortType) {
+                link.classList.add(config.CSS_CLASSES.DROPDOWN_ITEM_ACTIVE);
+                if (this.dom.sortOptionsDropdown) {
+                  const icon = `
+																								<i class="bi bi-sort-down"></i>`;
+                  this.dom.sortOptionsDropdown.innerHTML = icon + `
+																								<span class="button-text-nav"> ${link.textContent}</span>`;
+                }
+              } else {
+                link.classList.remove(config.CSS_CLASSES.DROPDOWN_ITEM_ACTIVE);
+              }
+            });
+          },
+          renderChecklist: function(sortedAndFilteredSections, filterText, isChecklistEmpty, lastEditedItemId = null) {
+            this.dom.checklistContainer.innerHTML = '';
+            this.dom.checklistContainer.setAttribute('aria-busy', 'true');
+            this.renderChecklistName(DataManager.getChecklistName());
+            this.updateSortDropdownButton(DataManager.getSortOrder());
+            if (sortedAndFilteredSections.length === 0 && !isChecklistEmpty && filterText) {
+              this.dom.emptyMsg.textContent = "No items match your filter criteria.";
+              this.dom.emptyMsg.style.display = 'block';
+            } else if (isChecklistEmpty && sortedAndFilteredSections.length === 0) {
+              this.dom.emptyMsg.textContent = 'Your checklist is empty. Click "+Item" to get started!';
+              this.dom.emptyMsg.style.display = 'block';
+            } else {
+              this.dom.emptyMsg.style.display = 'none';
+              sortedAndFilteredSections.forEach(sectionData => {
+                if (sectionData.items.length > 0 || (sectionData.name === config.UNCATEGORIZED_SECTION_NAME && sortedAndFilteredSections.length === 1 && sectionData.items.length === 0 && !filterText && !isChecklistEmpty)) {
+                  const sectionHeader = document.createElement('div');
+                  sectionHeader.className = 'section-header';
+                  sectionHeader.textContent = sectionData.name;
+                  const itemCountSpan = document.createElement('span');
+                  itemCountSpan.className = 'section-item-count';
+                  itemCountSpan.textContent = `(${sectionData.items.length} item${sectionData.items.length !== 1 ? 's' : ''})`;
+                  sectionHeader.appendChild(itemCountSpan);
+                  this.dom.checklistContainer.appendChild(sectionHeader);
+                  if (sectionData.items.length > 0) {
+                    sectionData.items.forEach((item, index) => {
+                      this._renderItemRecursive(item, 1, this.dom.checklistContainer, index + 1, sectionData.items.length);
+                    });
+                  } else if (filterText && sectionData.name !== config.UNCATEGORIZED_SECTION_NAME) {
+                    const emptySectionMsg = document.createElement('div');
+                    emptySectionMsg.className = 'empty-section-message';
+                    emptySectionMsg.textContent = '(No matching items in this section)';
+                    this.dom.checklistContainer.appendChild(emptySectionMsg);
+                  }
+                }
+              });
+            }
+            this.updateProgressDisplay();
+            if (filterText) {
+              this.dom.searchInput.classList.add(config.CSS_CLASSES.FILTER_ACTIVE);
+            } else {
+              this.dom.searchInput.classList.remove(config.CSS_CLASSES.FILTER_ACTIVE);
+            }
+            if (lastEditedItemId) {
+              this.scrollToItem(lastEditedItemId);
+            }
+            this.dom.checklistContainer.setAttribute('aria-busy', 'false');
+          },
+          _renderItemRecursive: function(item, level, parentDomElement, positionInGroup, groupSize) {
+            const templateClone = this.itemTemplate.content.cloneNode(true);
+            const itemEl = templateClone.querySelector('.list-group-item');
+            const itemTextSpan = itemEl.querySelector('.item-text');
+            itemEl.dataset.id = item.id;
+            itemTextSpan.id = `item-text-${item.id}`;
+            itemEl.setAttribute('aria-level', level);
+            itemEl.setAttribute('aria-posinset', positionInGroup);
+            itemEl.setAttribute('aria-setsize', groupSize);
+            itemEl.style.paddingLeft = `${1.25 + ((level -1) * 1.5)}rem`;
+            if (item.status === 'completed') itemEl.classList.add(config.CSS_CLASSES.COMPLETED);
+            itemEl.classList.add(`priority-${item.priority}`);
+            const today = new Date().toISOString().split('T')[0];
+            if (item.dueDate && item.dueDate < today && item.status !== 'completed' && item.status !== 'not_applicable') {
+              itemEl.classList.add(config.CSS_CLASSES.OVERDUE);
+            }
+            const filterText = this.dom.searchInput.value.trim().toLowerCase();
+            let itemTextContent = item.text;
+            if (filterText && item.text.toLowerCase().includes(filterText)) {
+              const regex = new RegExp(`(${filterText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+              itemTextContent = item.text.replace(regex, `
+																								<span class="${config.CSS_CLASSES.SEARCH_HIGHLIGHT}">$1</span>`);
+            }
+            itemTextSpan.innerHTML = itemTextContent;
+            const checkbox = itemEl.querySelector('.item-checkbox');
+            checkbox.checked = item.status === 'completed';
+            checkbox.setAttribute('aria-label', `Toggle completion for ${item.text}`);
+            checkbox.setAttribute('aria-describedby', `item-text-${item.id}`);
+            let itemIconsHtml = '';
+            if (item.isCritical) itemIconsHtml += `
+																								<i class="bi bi-exclamation-triangle-fill critical-icon" title="Critical"></i> `;
+            if (item.isPausePoint) itemIconsHtml += `
+																								<i class="bi bi-pause-circle-fill pause-point-icon" title="Pause Point"></i>`;
+            itemEl.querySelector('.item-icons').innerHTML = itemIconsHtml;
+            let statusBadgeHtml = '';
+            if (item.status === 'not_applicable') statusBadgeHtml = `
+																								<span class="badge bg-info">N/A</span>`;
+            else if (item.status === 'failed') statusBadgeHtml = `
+																								<span class="badge bg-danger">Failed</span>`;
+            itemEl.querySelector('.item-status-badge').innerHTML = statusBadgeHtml;
+            let metaHtml = '';
+            if (item.dueDate) metaHtml += `
+																								<i class="bi bi-calendar-event"></i> ${item.dueDate} `;
+            if (item.assignee) metaHtml += `
+																								<i class="bi bi-person-fill ms-2"></i> ${item.assignee}`;
+            itemEl.querySelector('.item-meta').innerHTML = metaHtml;
+            let tagsHtml = '';
+            if (item.tags && item.tags.length > 0) {
+              tagsHtml = item.tags.map(tag => {
+                let displayTag = tag;
+                if (filterText && tag.toLowerCase().includes(filterText)) {
+                  const regex = new RegExp(`(${filterText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                  displayTag = tag.replace(regex, `
+																								<span class="${config.CSS_CLASSES.SEARCH_HIGHLIGHT}">$1</span>`);
+                }
+                return `
+																								<span class="badge bg-secondary me-1">${displayTag}</span>`;
+              }).join('');
+            }
+            itemEl.querySelector('.item-tags').innerHTML = tagsHtml;
+            const notesBtn = itemEl.querySelector('.notes-btn');
+            notesBtn.querySelector('i').className = `bi ${item.notes && item.notes.trim() !== '' ? config.CSS_CLASSES.NOTES_FILLED : config.CSS_CLASSES.NOTES_EMPTY}`;
+            notesBtn.setAttribute('aria-label', `View/Edit notes for ${item.text}`);
+            notesBtn.setAttribute('aria-describedby', `item-text-${item.id}`);
+            const addSubtaskBtn = itemEl.querySelector('.add-subtask-btn');
+            addSubtaskBtn.setAttribute('aria-label', `Add sub-task to ${item.text}`);
+            addSubtaskBtn.setAttribute('aria-describedby', `item-text-${item.id}`);
+            const editBtn = itemEl.querySelector('.edit-btn');
+            editBtn.setAttribute('aria-label', `Edit item ${item.text}`);
+            editBtn.setAttribute('aria-describedby', `item-text-${item.id}`);
+            const deleteBtn = itemEl.querySelector('.delete-btn');
+            deleteBtn.setAttribute('aria-label', `Delete item ${item.text}`);
+            deleteBtn.setAttribute('aria-describedby', `item-text-${item.id}`);
+            const expandIconSpan = itemEl.querySelector('.expand-icon');
+            const expandIconI = expandIconSpan.querySelector('i');
+            if (item.subItems && item.subItems.length > 0) {
+              expandIconSpan.setAttribute('aria-expanded', item.isExpanded.toString());
+              expandIconSpan.setAttribute('aria-controls', `subitems-${item.id}`);
+              expandIconI.className = `bi ${item.isExpanded ? config.CSS_CLASSES.EXPAND_DOWN : config.CSS_CLASSES.EXPAND_RIGHT}`;
+              expandIconSpan.style.visibility = 'visible';
+              expandIconSpan.setAttribute('aria-label', `${item.isExpanded ? 'Collapse' : 'Expand'} sub-tasks for ${item.text}`);
+            } else {
+              expandIconSpan.style.visibility = 'hidden';
+              expandIconSpan.removeAttribute('aria-expanded');
+              expandIconSpan.removeAttribute('aria-controls');
+              expandIconSpan.removeAttribute('aria-label');
+            }
+            parentDomElement.appendChild(itemEl);
+            if (item._isNew) {
+              itemEl.classList.add(config.CSS_CLASSES.ITEM_ADDED_FLASH);
+              setTimeout(() => {
+                itemEl.classList.remove(config.CSS_CLASSES.ITEM_ADDED_FLASH);
+              }, config.ADD_ITEM_FLASH_DURATION);
+              delete item._isNew;
+            }
+            if (item.subItems && item.subItems.length > 0) {
+              const subItemsContainer = document.createElement('div');
+              subItemsContainer.id = `subitems-${item.id}`;
+              subItemsContainer.className = `sub-item-container ${item.isExpanded ? '' : 'd-none'}`;
+              item.subItems.forEach((subItem, index) => this._renderItemRecursive(subItem, level + 1, subItemsContainer, index + 1, item.subItems.length));
+              parentDomElement.appendChild(subItemsContainer);
+            }
+          },
+          updateProgressDisplay: function() {
+            const progress = DataManager.getProgress();
+            const percentage = progress.total > 0 ? (progress.completed / progress.total) * 100 : 0;
+            this.dom.progressBar.style.width = `${percentage}%`;
+            this.dom.progressBar.setAttribute('aria-valuenow', percentage);
+            this.dom.progressText.textContent = `${progress.completed} / ${progress.total}`;
+            this.dom.progressDisplayContainer.querySelector('.progress').setAttribute('aria-label', `Checklist completion: ${progress.completed} of ${progress.total} items completed.`);
+          },
+          openItemModal: function(itemToEdit = null, parentIdForNewSubtask = null) {
+            this.lastFocusedElement = document.activeElement;
+            this.dom.itemForm.reset();
+            if (itemToEdit) {
+              this.dom.itemModalLabel.textContent = 'Edit Item';
+              this.dom.itemId.value = itemToEdit.id;
+              this.dom.itemText.value = itemToEdit.text;
+              this.dom.itemPriority.value = itemToEdit.priority;
+              this.dom.itemStatus.value = itemToEdit.status;
+              this.dom.itemPurpose.value = itemToEdit.purpose;
+              this.dom.itemDueDate.value = itemToEdit.dueDate || '';
+              this.dom.itemAssignee.value = itemToEdit.assignee || '';
+              this.dom.itemNotes.value = itemToEdit.notes || '';
+              this.dom.itemTags.value = itemToEdit.tags ? itemToEdit.tags.join(', ') : '';
+              this.dom.itemIsCritical.checked = itemToEdit.isCritical;
+              this.dom.itemReferences.value = itemToEdit.references ? itemToEdit.references.join(', ') : '';
+              const itemPath = DataManager.findItemPathById(itemToEdit.id);
+              const isSubItem = itemPath && itemPath.fullPath.length > 1;
+              if (isSubItem) {
+                this.dom.itemSectionContainer.classList.add('d-none');
+                this.dom.itemSection.value = '';
+                const parentInfo = itemPath.fullPath[itemPath.fullPath.length - 2];
+                this.dom.parentId.value = parentInfo.item.id;
+              } else {
+                this.dom.itemSectionContainer.classList.remove('d-none');
+                this.dom.itemSection.value = itemToEdit.section || '';
+                this.dom.parentId.value = '';
+              }
+            } else {
+              this.dom.itemModalLabel.textContent = parentIdForNewSubtask ? 'Add Sub-task' : 'Add New Item';
+              this.dom.itemId.value = '';
+              this.dom.parentId.value = parentIdForNewSubtask || '';
+              if (parentIdForNewSubtask) {
+                this.dom.itemSectionContainer.classList.add('d-none');
+                this.dom.itemSection.value = '';
+              } else {
+                this.dom.itemSectionContainer.classList.remove('d-none');
+                this.dom.itemSection.value = '';
+              }
+              this.dom.itemPriority.value = 'medium';
+              this.dom.itemStatus.value = 'pending';
+              this.dom.itemPurpose.value = 'standard';
+              this.dom.itemIsCritical.checked = false;
+            }
+            this.modals.itemModal.show();
+            this.dom.itemModalEl.addEventListener('shown.bs.modal', () => this.dom.itemText.focus(), {
+              once: true
+            });
+          },
+          closeItemModal: function() {
+            this.modals.itemModal.hide();
+          },
+          getItemFormValues: function() {
+            const purposeValue = this.dom.itemPurpose.value;
+            return {
+              id: this.dom.itemId.value,
+              parentId: this.dom.parentId.value,
+              text: this.dom.itemText.value.trim(),
+              priority: this.dom.itemPriority.value,
+              status: this.dom.itemStatus.value,
+              purpose: purposeValue,
+              dueDate: this.dom.itemDueDate.value || null,
+              assignee: this.dom.itemAssignee.value.trim(),
+              notes: this.dom.itemNotes.value.trim(),
+              tags: this.dom.itemTags.value.split(',').map(t => t.trim()).filter(t => t),
+              isCritical: this.dom.itemIsCritical.checked,
+              references: this.dom.itemReferences.value.split(',').map(r => r.trim()).filter(r => r),
+              section: this.dom.parentId.value ? '' : this.dom.itemSection.value.trim(),
+            };
+          },
+          openNotesModal: function(item) {
+            this.lastFocusedElement = document.activeElement;
+            this.dom.notesItemIdEl.value = item.id;
+            this.dom.notesItemTextEl.textContent = item.text;
+            this.dom.notesTextareaEl.value = item.notes || '';
+            this.modals.notesModal.show();
+            this.dom.notesModalEl.addEventListener('shown.bs.modal', () => this.dom.notesTextareaEl.focus(), {
+              once: true
+            });
+          },
+          closeNotesModal: function() {
+            this.modals.notesModal.hide();
+          },
+          openDeleteItemModal: function(item) {
+            this.lastFocusedElement = document.activeElement;
+            this.dom.deleteItemNameEl.textContent = item.text;
+            this.dom.deleteItemIdEl.value = item.id;
+            this.modals.deleteItemModal.show();
+          },
+          closeDeleteItemModal: function() {
+            this.modals.deleteItemModal.hide();
+          },
+          openClearChecklistModal: function() {
+            this.lastFocusedElement = document.activeElement;
+            this.modals.clearChecklistModal.show();
+          },
+          closeClearChecklistModal: function() {
+            this.modals.clearChecklistModal.hide();
+          },
+          openClearCompletedModal: function() {
+            this.lastFocusedElement = document.activeElement;
+            if (this.modals.clearCompletedModal) this.modals.clearCompletedModal.show();
+          },
+          closeClearCompletedModal: function() {
+            if (this.modals.clearCompletedModal) this.modals.clearCompletedModal.hide();
+          },
+          openPausePointModal: function(item) {
+            this.lastFocusedElement = document.activeElement;
+            this.dom.pausePointItemIdEl.value = item.id;
+            this.dom.pausePointItemTextEl.textContent = item.text;
+            this.dom.pausePointItemNotesEl.textContent = item.notes || 'N/A';
+            this.modals.pausePointModal.show();
+          },
+          closePausePointModal: function() {
+            this.modals.pausePointModal.hide();
+          },
+          triggerImportFile: function() {
+            this.dom.importFileEl.click();
+          },
+          resetImportFile: function() {
+            this.dom.importFileEl.value = '';
+          },
+          showAlert: function(message, type = 'success', duration = 4000) {
+            const alertEl = document.createElement('div');
+            alertEl.className = `alert alert-${type} alert-dismissible fade show`;
+            alertEl.role = 'alert';
+            alertEl.innerHTML = `${message}
+																								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>`;
+            this.dom.globalAlertsContainer.appendChild(alertEl);
+            this.announceToSR(`${type === 'danger' || type === 'warning' ? 'Alert: ' : ''}${message}`);
+            setTimeout(() => {
+              const bsAlert = bootstrap.Alert.getInstance(alertEl);
+              if (bsAlert) bsAlert.close();
+              else if (alertEl.parentNode) alertEl.parentNode.removeChild(alertEl);
+            }, duration);
+          },
+          announceToSR: function(message) {
+            if (this.dom.srAnnouncer) {
+              this.dom.srAnnouncer.textContent = '';
+              setTimeout(() => {
+                this.dom.srAnnouncer.textContent = message;
+              }, 50);
+            }
+          },
+          scrollToItem: function(itemId) {
+            const itemElement = this.dom.checklistContainer.querySelector(`.list-group-item[data-id="${itemId}"]`);
+            if (itemElement) {
+              itemElement.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+              });
+              itemElement.setAttribute('tabindex', '-1');
+              itemElement.focus({
+                preventScroll: true
+              });
+            }
+          },
+          downloadJsonExport: function(data) {
+            if (data.items.length === 0 && !data.checklistName) {
+              this.showAlert("Checklist is empty.", "info");
+              return;
+            }
+            let sanitizedName = (data.checklistName || config.DEFAULT_CHECKLIST_NAME).replace(/\s+/g, '_').replace(/[^\w.-]/g, '');
+            if (!sanitizedName) sanitizedName = "Checklist";
+            const now = new Date();
+            const dateStr = now.toISOString().split('T')[0];
+            const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '');
+            const filename = `${sanitizedName}_${dateStr}_${timeStr}.json`;
+            const jsonStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([jsonStr], {
+              type: 'application/json'
+            });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            this.showAlert("Checklist exported.", "success");
+          }
+        };
+        const AppCore = {
+          _searchDebounceTimeout: null,
+          _lastEditedItemId: null,
+          _hasUnsavedChanges: false,
+          init: function() {
+            DataManager.init();
+            UIManager.init();
+            this.addEventListeners();
+            this.refreshChecklistDisplay();
+            if (DataManager._sampleDataLoadedDueToError) {
+              UIManager.showAlert("Error loading data from storage. Initialized with sample checklist.", 'warning');
+            } else if (DataManager._oldFormatMigrated) {
+              UIManager.showAlert("Checklist data format updated. Your data has been preserved.", 'info');
+            }
+          },
+          setUnsavedChanges: function(hasChanges) {
+            this._hasUnsavedChanges = hasChanges;
+          },
+          refreshChecklistDisplay: function(newlyAddedItemId = null, lastEditedItemId = null) {
+            const filterText = UIManager.dom.searchInput.value.trim();
+            const displayData = DataManager.getSortedAndFilteredDataForDisplay(filterText);
+            const isChecklistTrulyEmpty = DataManager.checklistItems.length === 0;
+            if (newlyAddedItemId) {
+              function markNewRecursive(items) {
+                for (const item of items) {
+                  if (item.id === newlyAddedItemId) {
+                    item._isNew = true;
+                    return true;
+                  }
+                  if (item.subItems && markNewRecursive(item.subItems)) return true;
+                }
+                return false;
+              }
+              displayData.forEach(section => markNewRecursive(section.items));
+            }
+            UIManager.renderChecklist(displayData, filterText, isChecklistTrulyEmpty, lastEditedItemId || this._lastEditedItemId);
+            this._lastEditedItemId = null;
+            if (document.activeElement !== UIManager.dom.checklistNameInput) {
+              this.setUnsavedChanges(false);
+            }
+          },
+          addEventListeners: function() {
+            if (UIManager.dom.addItemBtn) {
+              UIManager.dom.addItemBtn.addEventListener('click', () => {
+                UIManager.lastFocusedElement = document.activeElement;
+                UIManager.openItemModal();
+              });
+            }
+            document.addEventListener('keydown', (event) => {
+              if ((event.ctrlKey || event.metaKey) && event.key === '/') {
+                event.preventDefault();
+                UIManager.dom.searchInput.focus();
+                UIManager.announceToSR("Search input focused.");
+              }
+              if (event.altKey && event.key.toLowerCase() === 'n') {
+                event.preventDefault();
+                const isModalOpen = Object.values(UIManager.modals).some(m => m && m._isShown);
+                if (!isModalOpen) {
+                  UIManager.lastFocusedElement = document.activeElement;
+                  UIManager.openItemModal();
+                  UIManager.announceToSR("Add new item modal opened.");
+                }
+              }
+            });
+            if (UIManager.dom.itemForm) {
+              UIManager.dom.itemForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const formValues = UIManager.getItemFormValues();
+                if (!formValues.text) {
+                  UIManager.showAlert('Task text required.', 'warning');
+                  UIManager.announceToSR('Task text required.');
+                  return;
+                }
+                const isUpdating = !!formValues.id;
+                const result = DataManager.addOrUpdateItem(formValues, formValues.id, formValues.parentId);
+                if (result) {
+                  const actionText = isUpdating ? 'updated' : 'added';
+                  UIManager.showAlert(`Item "${result.text}" ${actionText}.`, 'success');
+                  UIManager.announceToSR(`Item ${result.text} ${actionText}.`);
+                  this._lastEditedItemId = result.id;
+                  this.refreshChecklistDisplay(isUpdating ? null : result.id, this._lastEditedItemId);
+                  UIManager.closeItemModal();
+                } else {
+                  UIManager.showAlert(`Error processing item.`, 'danger');
+                  UIManager.announceToSR(`Error processing item.`);
+                }
+              });
+            }
+            if (UIManager.dom.searchInput) {
+              UIManager.dom.searchInput.addEventListener('input', () => {
+                clearTimeout(this._searchDebounceTimeout);
+                this._searchDebounceTimeout = setTimeout(() => {
+                  this.refreshChecklistDisplay();
+                }, config.DEBOUNCE_DELAY);
+                if (UIManager.dom.clearSearchBtn) UIManager.dom.clearSearchBtn.style.display = UIManager.dom.searchInput.value ? 'inline-block' : 'none';
+              });
+            }
+            if (UIManager.dom.clearSearchBtn) {
+              UIManager.dom.clearSearchBtn.addEventListener('click', () => {
+                UIManager.dom.searchInput.value = '';
+                UIManager.dom.searchInput.classList.remove(config.CSS_CLASSES.FILTER_ACTIVE);
+                UIManager.dom.clearSearchBtn.style.display = 'none';
+                this.refreshChecklistDisplay();
+                UIManager.dom.searchInput.focus();
+                UIManager.announceToSR('Search filter cleared.');
+                const firstItem = UIManager.dom.checklistContainer.querySelector('.list-group-item');
+                if (firstItem) firstItem.focus();
+              });
+            }
+            if (UIManager.dom.exportBtn) {
+              UIManager.dom.exportBtn.addEventListener('click', () => UIManager.downloadJsonExport(DataManager.getDataForExport()));
+            }
+            if (UIManager.dom.checklistNameInput) {
+              UIManager.dom.checklistNameInput.addEventListener('input', () => {
+                this.setUnsavedChanges(true);
+              });
+              UIManager.dom.checklistNameInput.addEventListener('change', (event) => {
+                DataManager.setChecklistName(event.target.value);
+                UIManager.showChecklistNameSavedFeedback();
+                UIManager.announceToSR(`Checklist name updated to ${DataManager.getChecklistName()}`);
+                this.setUnsavedChanges(false);
+              });
+            }
+            if (UIManager.dom.importBtnTrigger) {
+              UIManager.dom.importBtnTrigger.addEventListener('click', () => {
+                UIManager.lastFocusedElement = document.activeElement;
+                UIManager.triggerImportFile();
+              });
+            }
+            if (UIManager.dom.importFileEl) {
+              UIManager.dom.importFileEl.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                  try {
+                    const importedData = JSON.parse(e.target.result);
+                    DataManager.importData(importedData);
+                    this.refreshChecklistDisplay(null, null); // MODIFIED: Prevent scroll on import
+                    UIManager.showAlert('Imported successfully!', 'success');
+                    UIManager.announceToSR('Checklist imported successfully.');
+                  } catch (err) {
+                    UIManager.showAlert(`Import error: ${err.message}`, 'danger');
+                    console.error("Import error:", err);
+                    UIManager.announceToSR(`Import error: ${err.message}`);
+                  } finally {
+                    UIManager.resetImportFile();
+                    if (UIManager.lastFocusedElement) UIManager.lastFocusedElement.focus();
+                  }
+                };
+                reader.readAsText(file);
+              });
+            }
+            if (UIManager.dom.saveNotesBtn) {
+              UIManager.dom.saveNotesBtn.addEventListener('click', () => {
+                const itemId = UIManager.dom.notesItemIdEl.value;
+                const notes = UIManager.dom.notesTextareaEl.value.trim();
+                const updatedItem = DataManager.updateNotes(itemId, notes);
+                if (updatedItem) {
+                  this.refreshChecklistDisplay(null, itemId);
+                  UIManager.showAlert(`Notes for "${updatedItem.text}" saved.`, 'success');
+                  UIManager.announceToSR(`Notes for item ${updatedItem.text} saved.`);
+                }
+                UIManager.closeNotesModal();
+              });
+            }
+            if (UIManager.dom.confirmDeleteBtn) {
+              UIManager.dom.confirmDeleteBtn.addEventListener('click', () => {
+                const itemId = UIManager.dom.deleteItemIdEl.value;
+                const itemEl = UIManager.dom.checklistContainer.querySelector(`.list-group-item[data-id="${itemId}"]`);
+                const itemTextForAnnouncement = DataManager.findItemPathById(itemId)?.item.text || 'item';
+                const itemPath = DataManager.findItemPathById(itemId);
+                let nextFocusElement = null;
+                if (itemPath) {
+                  const siblings = itemPath.list;
+                  if (siblings.length > 1) {
+                    nextFocusElement = siblings[itemPath.index + 1] || siblings[itemPath.index - 1];
+                  } else if (itemPath.fullPath.length > 1) {
+                    nextFocusElement = UIManager.dom.checklistContainer.querySelector(`.list-group-item[data-id="${itemPath.fullPath[itemPath.fullPath.length-2].item.id}"]`);
+                  }
+                }
+                if (itemEl) {
+                  itemEl.classList.add(config.CSS_CLASSES.ITEM_FADING_OUT);
+                  setTimeout(() => {
+                    DataManager.deleteItem(itemId);
+                    this.refreshChecklistDisplay();
+                    UIManager.showAlert(`Item "${itemTextForAnnouncement}" deleted.`, 'success');
+                    UIManager.announceToSR(`Item ${itemTextForAnnouncement} deleted.`);
+                    UIManager.closeDeleteItemModal();
+                    if (nextFocusElement && nextFocusElement.id) {
+                      const nextElToFocus = UIManager.dom.checklistContainer.querySelector(`.list-group-item[data-id="${nextFocusElement.id}"]`);
+                      if (nextElToFocus) nextElToFocus.focus();
+                    } else if (DataManager.checklistItems.length > 0) {
+                      const firstItemAfterDelete = UIManager.dom.checklistContainer.querySelector('.list-group-item');
+                      if (firstItemAfterDelete) firstItemAfterDelete.focus();
+                    } else if (UIManager.dom.addItemBtn) {
+                      UIManager.dom.addItemBtn.focus();
+                    }
+                  }, config.DELETE_ITEM_FADE_DURATION);
+                } else {
+                  DataManager.deleteItem(itemId);
+                  this.refreshChecklistDisplay();
+                  UIManager.showAlert(`Item "${itemTextForAnnouncement}" deleted.`, 'success');
+                  UIManager.announceToSR(`Item ${itemTextForAnnouncement} deleted.`);
+                  UIManager.closeDeleteItemModal();
+                }
+              });
+            }
+            if (UIManager.dom.clearChecklistBtn) {
+              UIManager.dom.clearChecklistBtn.addEventListener('click', () => UIManager.openClearChecklistModal());
+            }
+            if (UIManager.dom.confirmClearBtn) {
+              UIManager.dom.confirmClearBtn.addEventListener('click', () => {
+                DataManager.clearAllItems();
+                this.refreshChecklistDisplay();
+                UIManager.closeClearChecklistModal();
+                UIManager.showAlert('Checklist cleared.', 'warning');
+                UIManager.announceToSR('Entire checklist cleared.');
+              });
+            }
+            if (UIManager.dom.confirmClearCompletedBtn) {
+              UIManager.dom.confirmClearCompletedBtn.addEventListener('click', () => {
+                DataManager.clearCompletedItems();
+                this.refreshChecklistDisplay();
+                UIManager.closeClearCompletedModal();
+                UIManager.showAlert('Completed tasks cleared.', 'info');
+                UIManager.announceToSR('Completed tasks cleared.');
+              });
+            }
+            if (UIManager.dom.confirmPausePointBtn) {
+              UIManager.dom.confirmPausePointBtn.addEventListener('click', () => {
+                const itemId = UIManager.dom.pausePointItemIdEl.value;
+                const updatedItem = DataManager.updateItemStatus(itemId, 'completed');
+                if (updatedItem) {
+                  this.refreshChecklistDisplay(null, itemId);
+                  UIManager.showAlert(`Pause point "${updatedItem.text}" completed.`, 'success');
+                  UIManager.announceToSR(`Pause point ${updatedItem.text} completed.`);
+                }
+                UIManager.closePausePointModal();
+              });
+            }
+            if (UIManager.dom.scrollToTopBtn) {
+              UIManager.dom.scrollToTopBtn.addEventListener('click', () => {
+                window.scrollTo({
+                  top: 0,
+                  behavior: 'smooth'
+                });
+              });
+            }
+            window.addEventListener('scroll', () => {
+              if (UIManager.dom.scrollToTopBtn) {
+                if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                  UIManager.dom.scrollToTopBtn.style.display = "block";
+                } else {
+                  UIManager.dom.scrollToTopBtn.style.display = "none";
+                }
+              }
+            });
+            if (UIManager.dom.sortOptionsLinks) {
+              UIManager.dom.sortOptionsLinks.forEach(link => {
+                link.addEventListener('click', (event) => {
+                  event.preventDefault();
+                  const sortType = event.target.dataset.sort;
+                  DataManager.setSortOrder(sortType);
+                  this.refreshChecklistDisplay();
+                  UIManager.announceToSR(`Checklist sorted by ${event.target.textContent}.`);
+                  UIManager.updateSortDropdownButton(sortType);
+                });
+              });
+            }
+            window.addEventListener('beforeunload', (event) => {
+              if (UIManager.dom.checklistNameInput && UIManager.dom.checklistNameInput.value !== DataManager.getChecklistName()) {
+                this.setUnsavedChanges(true);
+              }
+              if (this._hasUnsavedChanges) {
+                event.preventDefault();
+                event.returnValue = '';
+                return '';
+              }
+            });
+            if (UIManager.dom.githubChecklistDropdown) {
+              UIManager.dom.githubChecklistDropdown.addEventListener('click', async (event) => {
+                event.preventDefault();
+                const targetLink = event.target.closest('a.dropdown-item');
+                if (targetLink && targetLink.dataset.url) {
+                  const url = targetLink.dataset.url;
+                  const checklistName = targetLink.textContent;
+                  UIManager.lastFocusedElement = UIManager.dom.loadFromGithubBtn;
+                  try {
+                    UIManager.announceToSR(`Loading checklist: ${checklistName}`);
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                      throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    const jsonData = await response.json();
+                    DataManager.importData(jsonData);
+                    this.refreshChecklistDisplay(null, null); // MODIFIED: Prevent scroll on GitHub template load
+                    UIManager.showAlert(`Checklist "${DataManager.getChecklistName()}" loaded from GitHub.`, 'success');
+                    UIManager.announceToSR(`Checklist ${DataManager.getChecklistName()} loaded.`);
+                  } catch (err) {
+                    UIManager.showAlert(`Error loading checklist "${checklistName}" from GitHub: ${err.message}`, 'danger');
+                    UIManager.announceToSR(`Error loading checklist ${checklistName}.`);
+                    console.error("Error loading checklist from GitHub:", err);
+                  }
+                }
+              });
+            }
+            if (UIManager.dom.checklistContainer) {
+              UIManager.dom.checklistContainer.addEventListener('click', (event) => {
+                const target = event.target;
+                const listItem = target.closest('.list-group-item');
+                if (!listItem) return;
+                const itemId = listItem.dataset.id;
+                if (!itemId) return;
+                const itemPath = DataManager.findItemPathById(itemId);
+                if (!itemPath) return;
+                const item = itemPath.item;
+                UIManager.lastFocusedElement = target;
+                if (target.matches('.edit-btn, .edit-btn *')) UIManager.openItemModal(item);
+                else if (target.matches('.delete-btn, .delete-btn *')) UIManager.openDeleteItemModal(item);
+                else if (target.matches('.notes-btn, .notes-btn *')) UIManager.openNotesModal(item);
+                else if (target.matches('.item-checkbox')) {
+                  const newStatus = target.checked ? 'completed' : 'pending';
+                  if (newStatus === 'completed' && item.isPausePoint) {
+                    UIManager.openPausePointModal(item);
+                    target.checked = false;
+                  } else {
+                    DataManager.updateItemStatus(itemId, newStatus);
+                    this.refreshChecklistDisplay(null, itemId);
+                    UIManager.showAlert(`"${item.text}" status: ${newStatus}.`, 'info');
+                    UIManager.announceToSR(`Item ${item.text} status updated to ${newStatus}.`);
+                  }
+                } else if (target.matches('.expand-icon, .expand-icon *')) {
+                  DataManager.toggleExpandState(itemId);
+                  this.refreshChecklistDisplay(null, itemId);
+                  UIManager.announceToSR(`Sub-tasks for ${item.text} ${DataManager.findItemPathById(itemId).item.isExpanded ? 'expanded' : 'collapsed'}.`);
+                  setTimeout(() => {
+                    const newIcon = UIManager.dom.checklistContainer.querySelector(`.list-group-item[data-id="${itemId}"] .expand-icon`);
+                    if (newIcon) newIcon.focus();
+                    else if (UIManager.lastFocusedElement) UIManager.lastFocusedElement.focus();
+                  }, 0);
+                } else if (target.matches('.add-subtask-btn, .add-subtask-btn *')) {
+                  UIManager.openItemModal(null, itemId);
+                }
+              });
+              UIManager.dom.checklistContainer.addEventListener('keydown', (event) => {
+                const target = event.target;
+                const currentItemEl = target.closest('.list-group-item');
+                if (!currentItemEl) {
+                  if (target.matches('.expand-icon') && (event.key === 'Enter' || event.key === ' ')) {
+                    event.preventDefault();
+                    const listItem = target.closest('.list-group-item');
+                    if (!listItem) return;
+                    const itemId = listItem.dataset.id;
+                    if (itemId) {
+                      UIManager.lastFocusedElement = target;
+                      const item = DataManager.findItemPathById(itemId).item;
+                      DataManager.toggleExpandState(itemId);
+                      this.refreshChecklistDisplay(null, itemId);
+                      UIManager.announceToSR(`Sub-tasks for ${item.text} ${DataManager.findItemPathById(itemId).item.isExpanded ? 'expanded' : 'collapsed'}.`);
+                      setTimeout(() => {
+                        const newIcon = UIManager.dom.checklistContainer.querySelector(`.list-group-item[data-id="${itemId}"] .expand-icon`);
+                        if (newIcon) newIcon.focus();
+                        else if (UIManager.lastFocusedElement) UIManager.lastFocusedElement.focus();
+                      }, 0);
+                    }
+                  }
+                  return;
+                }
+                const allItems = Array.from(UIManager.dom.checklistContainer.querySelectorAll('.list-group-item:not(.item-fading-out)'));
+                const currentIndex = allItems.indexOf(currentItemEl);
+                switch (event.key) {
+                  case 'ArrowUp':
+                    event.preventDefault();
+                    if (currentIndex > 0) allItems[currentIndex - 1].focus();
+                    break;
+                  case 'ArrowDown':
+                    event.preventDefault();
+                    if (currentIndex < allItems.length - 1) allItems[currentIndex + 1].focus();
+                    break;
+                  case 'Enter':
+                    if (document.activeElement === currentItemEl) {
+                      event.preventDefault();
+                      const itemId = currentItemEl.dataset.id;
+                      const itemPath = DataManager.findItemPathById(itemId);
+                      if (itemPath) UIManager.openItemModal(itemPath.item);
+                    }
+                    break;
+                  case 'Delete':
+                  case 'Backspace':
+                    if (document.activeElement === currentItemEl) {
+                      event.preventDefault();
+                      const itemId = currentItemEl.dataset.id;
+                      const itemPath = DataManager.findItemPathById(itemId);
+                      if (itemPath) UIManager.openDeleteItemModal(itemPath.item);
+                    }
+                    break;
+                }
+              });
+            }
+          }
+        };
+        return {
+          init: AppCore.init.bind(AppCore)
+        };
+      })();
+      document.addEventListener('DOMContentLoaded', DoneDepot.init);
+    </script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('sw.js')
+            .then(registration => {
+              console.log('ServiceWorker registration successful with scope: ', registration.scope);
+            })
+            .catch(err => {
+              console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+      }
+    </script>
+  </body>
+</html>
